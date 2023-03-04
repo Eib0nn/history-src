@@ -11,6 +11,7 @@ std::mutex console;
 
 void test_thread(){
     while(true){
+        int a;
         try{
             std::lock_guard<std::mutex> lock(console);
             printf("WorkingPT2\n");
