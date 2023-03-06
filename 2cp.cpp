@@ -9,6 +9,7 @@ using namespace mingw_stdthread;
 
 std::mutex console;
 // bot_test
+// still bot testing lol
 void test_thread(){
     while(true){
         int a;
