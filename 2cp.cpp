@@ -8,7 +8,7 @@
 using namespace mingw_stdthread;
 
 std::mutex console;
-
+// bot_test
 void test_thread(){
     while(true){
         int a;
