@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <thread>
 
+//testing my discord bot, just ignore this
 void Copy_A(const std::string &subdir_path)
 {
     std::ostringstream oss;
