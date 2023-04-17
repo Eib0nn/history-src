@@ -10,6 +10,7 @@
 
 //testing my discord bot, just ignore this
 //yeah, this gonna take a long time lmao
+//im starting to think that im doing something wrong
 void Copy_A(const std::string &subdir_path)
 {
     std::ostringstream oss;
